@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.BowuguanDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.bowuguan_name as bowuguanName
+        ,a.bowuguan_uuid_number as bowuguanUuidNumber
+        ,a.bowuguan_photo as bowuguanPhoto
+        ,a.bowuguan_address as bowuguanAddress
+        ,a.bowuguan_types as bowuguanTypes
+        ,a.bowuguan_content as bowuguanContent
+        ,a.bowuguan_kucun_number as bowuguanKucunNumber
+        ,a.bowuguan_delete as bowuguanDelete
+        ,a.insert_time as insertTime
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.BowuguanView" >
+        SELECT
+        <include refid="Base_Column_List" />
+
+--         级联表的字段
+
+        FROM bowuguan  a
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test=" params.bowuguanName != '' and params.bowuguanName != null and params.bowuguanName != 'null' ">
+                and a.bowuguan_name like CONCAT('%',#{params.bowuguanName},'%')
+            </if>
+            <if test=" params.bowuguanUuidNumber != '' and params.bowuguanUuidNumber != null and params.bowuguanUuidNumber != 'null' ">
+                and a.bowuguan_uuid_number like CONCAT('%',#{params.bowuguanUuidNumber},'%')
+            </if>
+            <if test=" params.bowuguanAddress != '' and params.bowuguanAddress != null and params.bowuguanAddress != 'null' ">
+                and a.bowuguan_address like CONCAT('%',#{params.bowuguanAddress},'%')
+            </if>
+            <if test="params.bowuguanTypes != null and params.bowuguanTypes != ''">
+                and a.bowuguan_types = #{params.bowuguanTypes}
+            </if>
+            <if test=" params.bowuguanContent != '' and params.bowuguanContent != null and params.bowuguanContent != 'null' ">
+                and a.bowuguan_content like CONCAT('%',#{params.bowuguanContent},'%')
+            </if>
+            <if test="params.bowuguanKucunNumberStart != null and params.bowuguanKucunNumberStart != ''">
+                <![CDATA[  and a.bowuguan_kucun_number >= #{params.bowuguanKucunNumberStart}   ]]>
+            </if>
+            <if test="params.bowuguanKucunNumberEnd != null and params.bowuguanKucunNumberEnd != ''">
+                <![CDATA[  and a.bowuguan_kucun_number <= #{params.bowuguanKucunNumberEnd}   ]]>
+            </if>
+             <if test="params.bowuguanKucunNumber != null and params.bowuguanKucunNumber != ''">
+                and a.bowuguan_kucun_number = #{params.bowuguanKucunNumber}
+             </if>
+            <if test="params.bowuguanDeleteStart != null and params.bowuguanDeleteStart != ''">
+                <![CDATA[  and a.bowuguan_delete >= #{params.bowuguanDeleteStart}   ]]>
+            </if>
+            <if test="params.bowuguanDeleteEnd != null and params.bowuguanDeleteEnd != ''">
+                <![CDATA[  and a.bowuguan_delete <= #{params.bowuguanDeleteEnd}   ]]>
+            </if>
+             <if test="params.bowuguanDelete != null and params.bowuguanDelete != ''">
+                and a.bowuguan_delete = #{params.bowuguanDelete}
+             </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+
+        </where>
+        order by a.${params.sort} ${params.order}
+    </select>
+
+</mapper>

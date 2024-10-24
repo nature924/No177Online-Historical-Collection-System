@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.BowuguanOrderDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.bowuguan_id as bowuguanId
+        ,a.yonghu_id as yonghuId
+        ,a.bowuguan_order_time as bowuguanOrderTime
+        ,a.buy_number as buyNumber
+        ,a.bowuguan_order_types as bowuguanOrderTypes
+        ,a.insert_time as insertTime
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.BowuguanOrderView" >
+        SELECT
+        <include refid="Base_Column_List" />
+
+--         级联表的字段
+        ,bowuguan.bowuguan_name as bowuguanName
+        ,bowuguan.bowuguan_uuid_number as bowuguanUuidNumber
+        ,bowuguan.bowuguan_photo as bowuguanPhoto
+        ,bowuguan.bowuguan_address as bowuguanAddress
+        ,bowuguan.bowuguan_types as bowuguanTypes
+        ,bowuguan.bowuguan_content as bowuguanContent
+        ,bowuguan.bowuguan_kucun_number as bowuguanKucunNumber
+        ,bowuguan.bowuguan_delete as bowuguanDelete
+        ,yonghu.yonghu_name as yonghuName
+        ,yonghu.yonghu_phone as yonghuPhone
+        ,yonghu.yonghu_id_number as yonghuIdNumber
+        ,yonghu.yonghu_photo as yonghuPhoto
+        ,yonghu.yonghu_email as yonghuEmail
+
+        FROM bowuguan_order  a
+        left JOIN bowuguan bowuguan ON a.bowuguan_id = bowuguan.id
+        left JOIN yonghu yonghu ON a.yonghu_id = yonghu.id
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test="params.bowuguanId != null and params.bowuguanId != ''">
+                and (
+                    a.bowuguan_id = #{params.bowuguanId}
+                )
+            </if>
+            <if test="params.yonghuId != null and params.yonghuId != ''">
+                and (
+                    a.yonghu_id = #{params.yonghuId}
+                )
+            </if>
+            <if test=" params.bowuguanOrderTimeStart != '' and params.bowuguanOrderTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.bowuguan_order_time) >= UNIX_TIMESTAMP(#{params.bowuguanOrderTimeStart}) ]]>
+            </if>
+            <if test=" params.bowuguanOrderTimeEnd != '' and params.bowuguanOrderTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.bowuguan_order_time) < UNIX_TIMESTAMP(#{params.bowuguanOrderTimeEnd}) ]]>
+            </if>
+            <if test="params.buyNumberStart != null and params.buyNumberStart != ''">
+                <![CDATA[  and a.buy_number >= #{params.buyNumberStart}   ]]>
+            </if>
+            <if test="params.buyNumberEnd != null and params.buyNumberEnd != ''">
+                <![CDATA[  and a.buy_number <= #{params.buyNumberEnd}   ]]>
+            </if>
+             <if test="params.buyNumber != null and params.buyNumber != ''">
+                and a.buy_number = #{params.buyNumber}
+             </if>
+            <if test="params.bowuguanOrderTypes != null and params.bowuguanOrderTypes != ''">
+                and a.bowuguan_order_types = #{params.bowuguanOrderTypes}
+            </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+
+                <!-- 判断博物馆的id不为空 -->
+            <if test=" params.bowuguanIdNotNull != '' and params.bowuguanIdNotNull != null and params.bowuguanIdNotNull != 'null' ">
+                and a.bowuguan_id IS NOT NULL
+            </if>
+            <if test=" params.bowuguanName != '' and params.bowuguanName != null and params.bowuguanName != 'null' ">
+                and bowuguan.bowuguan_name like CONCAT('%',#{params.bowuguanName},'%')
+            </if>
+            <if test=" params.bowuguanUuidNumber != '' and params.bowuguanUuidNumber != null and params.bowuguanUuidNumber != 'null' ">
+                and bowuguan.bowuguan_uuid_number like CONCAT('%',#{params.bowuguanUuidNumber},'%')
+            </if>
+            <if test=" params.bowuguanAddress != '' and params.bowuguanAddress != null and params.bowuguanAddress != 'null' ">
+                and bowuguan.bowuguan_address like CONCAT('%',#{params.bowuguanAddress},'%')
+            </if>
+            <if test="params.bowuguanTypes != null  and params.bowuguanTypes != ''">
+                and bowuguan.bowuguan_types = #{params.bowuguanTypes}
+            </if>
+
+            <if test=" params.bowuguanContent != '' and params.bowuguanContent != null and params.bowuguanContent != 'null' ">
+                and bowuguan.bowuguan_content like CONCAT('%',#{params.bowuguanContent},'%')
+            </if>
+            <if test="params.bowuguanKucunNumberStart != null  and params.bowuguanKucunNumberStart != '' ">
+                <![CDATA[  and bowuguan.bowuguan_kucun_number >= #{params.bowuguanKucunNumberStart}   ]]>
+            </if>
+            <if test="params.bowuguanKucunNumberEnd != null  and params.bowuguanKucunNumberEnd != '' ">
+                <![CDATA[  and bowuguan.bowuguan_kucun_number <= #{params.bowuguanKucunNumberEnd}   ]]>
+            </if>
+            <if test="params.bowuguanKucunNumber != null  and params.bowuguanKucunNumber != '' ">
+                and bowuguan.bowuguan_kucun_number = #{params.bowuguanKucunNumber}
+            </if>
+            <if test="params.bowuguanDeleteStart != null  and params.bowuguanDeleteStart != '' ">
+                <![CDATA[  and bowuguan.bowuguan_delete >= #{params.bowuguanDeleteStart}   ]]>
+            </if>
+            <if test="params.bowuguanDeleteEnd != null  and params.bowuguanDeleteEnd != '' ">
+                <![CDATA[  and bowuguan.bowuguan_delete <= #{params.bowuguanDeleteEnd}   ]]>
+            </if>
+            <if test="params.bowuguanDelete != null  and params.bowuguanDelete != '' ">
+                and bowuguan.bowuguan_delete = #{params.bowuguanDelete}
+            </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(bowuguan.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(bowuguan.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+                <!-- 判断用户的id不为空 -->
+            <if test=" params.yonghuIdNotNull != '' and params.yonghuIdNotNull != null and params.yonghuIdNotNull != 'null' ">
+                and a.yonghu_id IS NOT NULL
+            </if>
+            <if test=" params.yonghuName != '' and params.yonghuName != null and params.yonghuName != 'null' ">
+                and yonghu.yonghu_name like CONCAT('%',#{params.yonghuName},'%')
+            </if>
+            <if test=" params.yonghuPhone != '' and params.yonghuPhone != null and params.yonghuPhone != 'null' ">
+                and yonghu.yonghu_phone like CONCAT('%',#{params.yonghuPhone},'%')
+            </if>
+            <if test=" params.yonghuIdNumber != '' and params.yonghuIdNumber != null and params.yonghuIdNumber != 'null' ">
+                and yonghu.yonghu_id_number like CONCAT('%',#{params.yonghuIdNumber},'%')
+            </if>
+            <if test=" params.yonghuEmail != '' and params.yonghuEmail != null and params.yonghuEmail != 'null' ">
+                and yonghu.yonghu_email like CONCAT('%',#{params.yonghuEmail},'%')
+            </if>
+        </where>
+        order by a.${params.sort} ${params.order}
+    </select>
+
+</mapper>

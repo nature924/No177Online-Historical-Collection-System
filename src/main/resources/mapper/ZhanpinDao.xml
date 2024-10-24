@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.ZhanpinDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.bowuguan_id as bowuguanId
+        ,a.zhanpin_name as zhanpinName
+        ,a.zhanpin_uuid_number as zhanpinUuidNumber
+        ,a.zhanpin_photo as zhanpinPhoto
+        ,a.zhanpin_chuchu as zhanpinChuchu
+        ,a.zhanpin_content as zhanpinContent
+        ,a.jieru_time as jieruTime
+        ,a.yanghu_time as yanghuTime
+        ,a.zhanpin_delete as zhanpinDelete
+        ,a.insert_time as insertTime
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.ZhanpinView" >
+        SELECT
+        <include refid="Base_Column_List" />
+
+--         级联表的字段
+        ,bowuguan.bowuguan_name as bowuguanName
+        ,bowuguan.bowuguan_uuid_number as bowuguanUuidNumber
+        ,bowuguan.bowuguan_photo as bowuguanPhoto
+        ,bowuguan.bowuguan_address as bowuguanAddress
+        ,bowuguan.bowuguan_types as bowuguanTypes
+        ,bowuguan.bowuguan_content as bowuguanContent
+        ,bowuguan.bowuguan_kucun_number as bowuguanKucunNumber
+        ,bowuguan.bowuguan_delete as bowuguanDelete
+
+        FROM zhanpin  a
+        left JOIN bowuguan bowuguan ON a.bowuguan_id = bowuguan.id
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test="params.bowuguanId != null and params.bowuguanId != ''">
+                and (
+                    a.bowuguan_id = #{params.bowuguanId}
+                )
+            </if>
+            <if test=" params.zhanpinName != '' and params.zhanpinName != null and params.zhanpinName != 'null' ">
+                and a.zhanpin_name like CONCAT('%',#{params.zhanpinName},'%')
+            </if>
+            <if test=" params.zhanpinUuidNumber != '' and params.zhanpinUuidNumber != null and params.zhanpinUuidNumber != 'null' ">
+                and a.zhanpin_uuid_number like CONCAT('%',#{params.zhanpinUuidNumber},'%')
+            </if>
+            <if test=" params.zhanpinChuchu != '' and params.zhanpinChuchu != null and params.zhanpinChuchu != 'null' ">
+                and a.zhanpin_chuchu like CONCAT('%',#{params.zhanpinChuchu},'%')
+            </if>
+            <if test=" params.zhanpinContent != '' and params.zhanpinContent != null and params.zhanpinContent != 'null' ">
+                and a.zhanpin_content like CONCAT('%',#{params.zhanpinContent},'%')
+            </if>
+            <if test=" params.jieruTimeStart != '' and params.jieruTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.jieru_time) >= UNIX_TIMESTAMP(#{params.jieruTimeStart}) ]]>
+            </if>
+            <if test=" params.jieruTimeEnd != '' and params.jieruTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.jieru_time) <= UNIX_TIMESTAMP(#{params.jieruTimeEnd}) ]]>
+            </if>
+            <if test=" params.yanghuTimeStart != '' and params.yanghuTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.yanghu_time) >= UNIX_TIMESTAMP(#{params.yanghuTimeStart}) ]]>
+            </if>
+            <if test=" params.yanghuTimeEnd != '' and params.yanghuTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.yanghu_time) <= UNIX_TIMESTAMP(#{params.yanghuTimeEnd}) ]]>
+            </if>
+            <if test="params.zhanpinDeleteStart != null and params.zhanpinDeleteStart != ''">
+                <![CDATA[  and a.zhanpin_delete >= #{params.zhanpinDeleteStart}   ]]>
+            </if>
+            <if test="params.zhanpinDeleteEnd != null and params.zhanpinDeleteEnd != ''">
+                <![CDATA[  and a.zhanpin_delete <= #{params.zhanpinDeleteEnd}   ]]>
+            </if>
+             <if test="params.zhanpinDelete != null and params.zhanpinDelete != ''">
+                and a.zhanpin_delete = #{params.zhanpinDelete}
+             </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+
+                <!-- 判断博物馆的id不为空 -->
+            <if test=" params.bowuguanIdNotNull != '' and params.bowuguanIdNotNull != null and params.bowuguanIdNotNull != 'null' ">
+                and a.bowuguan_id IS NOT NULL
+            </if>
+            <if test=" params.bowuguanName != '' and params.bowuguanName != null and params.bowuguanName != 'null' ">
+                and bowuguan.bowuguan_name like CONCAT('%',#{params.bowuguanName},'%')
+            </if>
+            <if test=" params.bowuguanUuidNumber != '' and params.bowuguanUuidNumber != null and params.bowuguanUuidNumber != 'null' ">
+                and bowuguan.bowuguan_uuid_number like CONCAT('%',#{params.bowuguanUuidNumber},'%')
+            </if>
+            <if test=" params.bowuguanAddress != '' and params.bowuguanAddress != null and params.bowuguanAddress != 'null' ">
+                and bowuguan.bowuguan_address like CONCAT('%',#{params.bowuguanAddress},'%')
+            </if>
+            <if test="params.bowuguanTypes != null  and params.bowuguanTypes != ''">
+                and bowuguan.bowuguan_types = #{params.bowuguanTypes}
+            </if>
+
+            <if test=" params.bowuguanContent != '' and params.bowuguanContent != null and params.bowuguanContent != 'null' ">
+                and bowuguan.bowuguan_content like CONCAT('%',#{params.bowuguanContent},'%')
+            </if>
+            <if test="params.bowuguanKucunNumberStart != null  and params.bowuguanKucunNumberStart != '' ">
+                <![CDATA[  and bowuguan.bowuguan_kucun_number >= #{params.bowuguanKucunNumberStart}   ]]>
+            </if>
+            <if test="params.bowuguanKucunNumberEnd != null  and params.bowuguanKucunNumberEnd != '' ">
+                <![CDATA[  and bowuguan.bowuguan_kucun_number <= #{params.bowuguanKucunNumberEnd}   ]]>
+            </if>
+            <if test="params.bowuguanKucunNumber != null  and params.bowuguanKucunNumber != '' ">
+                and bowuguan.bowuguan_kucun_number = #{params.bowuguanKucunNumber}
+            </if>
+            <if test="params.bowuguanDeleteStart != null  and params.bowuguanDeleteStart != '' ">
+                <![CDATA[  and bowuguan.bowuguan_delete >= #{params.bowuguanDeleteStart}   ]]>
+            </if>
+            <if test="params.bowuguanDeleteEnd != null  and params.bowuguanDeleteEnd != '' ">
+                <![CDATA[  and bowuguan.bowuguan_delete <= #{params.bowuguanDeleteEnd}   ]]>
+            </if>
+            <if test="params.bowuguanDelete != null  and params.bowuguanDelete != '' ">
+                and bowuguan.bowuguan_delete = #{params.bowuguanDelete}
+            </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(bowuguan.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(bowuguan.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+        </where>
+        order by a.${params.sort} ${params.order}
+    </select>
+
+</mapper>
